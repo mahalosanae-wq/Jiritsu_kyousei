@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>自立共生ラボ ポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2f7a71;
+    --green-dark: #245f58;
+    --green-soft: #e7f1ef;
+    --green-line: #cfe3df;
+    --yellow: #e9c46a;
+    --cream: #fdf8ee;
+    --cream-line: #d9b77a;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --line: #e3e7e6;
+    --text: #222b2a;
+    --muted: #5f6b69;
+    --c-lecture: #2f7a71;
+    --c-meeting: #4a6fa5;
+    --c-deadline: #c0763a;
+    --c-event: #8a5aa8;
+    /* Slackの部屋の色（番号の十の位ごと） */
+    --s00: #2f7a71;
+    --s10: #3f6fa8;
+    --s30: #c27a17;
+    --s40: #8e4bb0;
+    --s50: #b0413a;
+    --s60: #56606b;
+    --s90: #17a085;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  a { color: var(--green-dark); }
+  code.ch { font-family: inherit; font-weight: 700; color: var(--green-dark); white-space: nowrap; }
+
+  /* ヘッダー */
+  header.hero {
+    background: var(--green);
+    color: #fff;
+    text-align: center;
+    padding: 44px 16px 36px;
+  }
+  header.hero h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: .04em;
+    font-weight: 700;
+  }
+  header.hero h1 .sep { color: var(--yellow); margin: 0 .5em; font-weight: 400; }
+  header.hero p { margin: 10px 0 0; font-size: 15px; opacity: .92; }
+
+  /* もくじ（上に固定） */
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  nav.toc ul {
+    list-style: none; margin: 0 auto; padding: 0 12px;
+    max-width: 1040px;
+    display: flex; gap: 4px;
+    overflow-x: auto; white-space: nowrap;
+    scrollbar-width: thin;
+  }
+  nav.toc a {
+    display: block; padding: 14px 10px;
+    font-size: 14px; font-weight: 500;
+    color: var(--muted); text-decoration: none;
+    border-bottom: 3px solid transparent;
+  }
+  nav.toc a:hover { color: var(--green); border-bottom-color: var(--green-line); }
+
+  main { max-width: 880px; margin: 0 auto; padding: 28px 16px 64px; }
+
+  .notice {
+    background: var(--cream);
+    border: 1px solid var(--cream-line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+  .notice p { margin: 0; }
+
+  section { margin-top: 56px; }
+  section > h2 {
+    font-size: 22px; margin: 0 0 6px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  section > h2 .num {
+    font-size: 14px; color: var(--green); font-weight: 700;
+    min-width: 2em;
+  }
+  .h2line { height: 3px; background: var(--green-line); margin: 10px 0 20px; border-radius: 2px; }
+  h3 { font-size: 18px; margin: 28px 0 10px; color: var(--green-dark); }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+
+  /* まとめた目次の中の小見出しと、その一覧 */
+  .subtoc { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
+  .subtoc a { margin-right: 4px; }
+  .subsec { margin-top: 36px; }
+  .subtoc + .subsec { margin-top: 20px; }
+  .subh {
+    font-size: 20px; color: var(--text); margin: 0 0 14px;
+    padding-left: 12px; border-left: 5px solid var(--green);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin: 14px 0;
+  }
+  .card h4 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 6px 0; }
+  .sub { font-size: 14px; color: var(--muted); }
+
+  ol.steps, ul.plain { margin: 8px 0; padding-left: 1.4em; }
+  ol.steps li, ul.plain li { margin: 6px 0; }
+
+  /* 番号つきの一覧（ルールなど） */
+  ol.rules { list-style: none; margin: 0; padding: 0; counter-reset: r; }
+  ol.rules li {
+    counter-increment: r;
+    position: relative;
+    padding: 14px 0 14px 44px;
+    border-bottom: 1px solid var(--line);
+  }
+  ol.rules li::before {
+    content: counter(r);
+    position: absolute; left: 6px; top: 14px;
+    color: var(--green); font-weight: 700;
+  }
+  ol.rules li strong { display: block; }
+  ol.rules li span { color: var(--muted); font-size: 15px; }
+
+  .btn {
+    display: inline-block;
+    background: var(--green); color: #fff;
+    padding: 9px 18px; border-radius: 8px;
+    text-decoration: none; font-weight: 700; font-size: 15px;
+    margin: 8px 8px 0 0;
+  }
+  .btn:hover { background: var(--green-dark); }
+  .btn.ghost { background: #fff; color: var(--green-dark); border: 1px solid var(--green-line); }
+  .btn.ghost:hover { background: var(--green-soft); }
+
+  /* 毎月のサイクル */
+  .cycle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cycle .card { margin: 0; border-top: 4px solid var(--green); }
+  .cycle .when { color: var(--green); font-weight: 700; font-size: 14px; }
+  .cycle h4 { margin: 2px 0 4px; }
+  .cycle p { margin: 0; font-size: 15px; color: var(--muted); }
+
+  /* リンク一覧 */
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .links .card { margin: 0; display: flex; flex-direction: column; }
+  .links .card .btn { align-self: flex-start; margin-top: auto; }
+  .links .card p { margin: 0 0 10px; font-size: 15px; }
+  .links ol.steps { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+
+  /* Slack：画面の見方 */
+  .screen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .screen .card { margin: 0; border-top: 4px solid var(--green); }
+  .screen .where { font-weight: 700; color: var(--green-dark); }
+  .screen p { margin: 4px 0 0; font-size: 15px; }
+
+  /* Slack：部屋の地図 */
+  .rooms { display: flex; flex-direction: column; gap: 10px; }
+  .room {
+    background: #fff; border: 1px solid var(--line); border-left: 6px solid var(--c);
+    border-radius: 10px; padding: 12px 16px;
+  }
+  .room .rh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+  .room .rn { color: var(--c); font-weight: 700; font-size: 17px; }
+  .room .rd { color: var(--muted); font-size: 14px; }
+  .room .rl { font-size: 15px; margin-top: 2px; }
+  .r00 { --c: var(--s00); } .r10 { --c: var(--s10); } .r30 { --c: var(--s30); } .r40 { --c: var(--s40); }
+  .r50 { --c: var(--s50); } .r60 { --c: var(--s60); } .r90 { --c: var(--s90); }
+
+  /* Slack：はじめの3ステップ */
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .three .card { margin: 0; display: flex; gap: 12px; align-items: flex-start; }
+  .three .n {
+    flex: 0 0 36px; height: 36px; border-radius: 50%;
+    background: var(--green); color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .three h4 { font-size: 16px; margin: 0 0 4px; }
+  .three p { margin: 0; font-size: 14px; color: var(--muted); }
+
+  /* Slack：投稿とスレッド */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .two .card { margin: 0; }
+  .two h4 { color: var(--green-dark); }
+
+  /* カレンダー */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 12px; }
+  .cal-head h3 { margin: 0; color: var(--text); }
+  .cal-nav button {
+    background: #fff; border: 1px solid var(--green-line); color: var(--green-dark);
+    border-radius: 8px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .cal-nav button:hover { background: var(--green-soft); }
+  .cal-nav button:disabled { opacity: .35; cursor: default; background: #fff; }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    background: var(--line); gap: 1px;
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .cal-grid .dow { background: var(--green-soft); text-align: center; font-size: 13px; font-weight: 700; padding: 6px 0; color: var(--green-dark); }
+  .cal-grid .dow.sun { color: #b4523f; }
+  .cal-grid .dow.sat { color: #3f6fb4; }
+  .cal-grid .day { background: #fff; min-height: 96px; padding: 6px; font-size: 13px; }
+  .cal-grid .day.empty { background: #f4f6f5; }
+  .cal-grid .day .d { font-weight: 700; font-size: 13px; color: var(--muted); }
+  .cal-grid .day.today .d {
+    background: var(--green); color: #fff; border-radius: 50%;
+    display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center;
+  }
+  .cal-ev {
+    display: block; width: 100%; text-align: left;
+    border: 0; border-left: 3px solid var(--c-lecture);
+    background: var(--green-soft); color: var(--text);
+    font: inherit; font-size: 12px; line-height: 1.4;
+    padding: 3px 5px; margin-top: 4px; border-radius: 4px; cursor: pointer;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .cal-ev:hover { filter: brightness(.96); }
+  .t-講座 { --c: var(--c-lecture); }
+  .t-ミーティング { --c: var(--c-meeting); }
+  .t-締め切り { --c: var(--c-deadline); }
+  .t-イベント { --c: var(--c-event); }
+  .cal-ev[class*="t-"] { border-left-color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); margin-right: 6px; vertical-align: 0; }
+
+  .ev-list { margin-top: 20px; }
+  .ev-card { display: flex; gap: 18px; align-items: flex-start; }
+  .ev-card.flash { box-shadow: 0 0 0 3px var(--green-line); }
+  .ev-date {
+    flex: 0 0 76px; text-align: center; color: #fff; background: var(--c);
+    border-radius: 10px; padding: 10px 0;
+  }
+  .ev-date .md { font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .ev-date .wd { font-size: 13px; }
+  .ev-body { flex: 1; min-width: 0; }
+  .ev-body h4 { margin: 0 0 2px; }
+  .ev-meta { font-size: 14px; color: var(--muted); }
+  .ev-body .desc { margin: 6px 0 0; font-size: 15px; }
+  .ev-body .btn { padding: 7px 14px; font-size: 14px; }
+  .ev-empty { color: var(--muted); }
+  .past { opacity: .72; }
+
+  /* 一覧表（担当者一覧） */
+  .tbl-wrap { overflow-x: auto; }
+  table.tbl { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 15px; }
+  table.tbl th { background: var(--green-soft); color: var(--green-dark); text-align: left; font-size: 14px; padding: 8px 12px; white-space: nowrap; }
+  table.tbl td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  table.tbl td.who { font-weight: 700; min-width: 7em; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag.wip { background: #fdf1e3; color: #9a5a1e; }
+  .tag.todo { background: #eef1f5; color: #4a5a70; }
+  .tag.next { background: var(--green-soft); color: var(--green-dark); }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; border-top: 1px solid var(--line); }
+
+  @media (max-width: 640px) {
+    header.hero h1 { font-size: 24px; }
+    header.hero h1 .sep { margin: 0 .3em; }
+    section > h2 { font-size: 20px; }
+    .card { padding: 16px; }
+    .cycle, .links, .screen, .three, .two { grid-template-columns: 1fr; }
+    .cal-grid .day { min-height: 54px; padding: 4px 3px; }
+    .cal-ev { font-size: 0; padding: 0; height: 6px; border-left-width: 0; background: var(--c) !important; margin-top: 3px; }
+    .ev-card { gap: 12px; }
+    .ev-date { flex-basis: 62px; }
+    .ev-date .md { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>自立共生ラボ<span class="sep">|</span>ポータル</h1>
+  <p>どこで何をすればいいか迷ったら、このページに戻ってきてください</p>
+</header>
+
+<nav class="toc" aria-label="もくじ">
+  <ul>
+    <li><a href="#intro">はじめに</a></li>
+    <li><a href="#schedule">スケジュール</a></li>
+    <li><a href="#links-slack">リンク・Slack</a></li>
+    <li><a href="#lecturer">講座の担当</a></li>
+    <li><a href="#propose">起案と立候補</a></li>
+    <li><a href="#members">担当者一覧</a></li>
+    <li><a href="#share">会費の分配</a></li>
+    <li><a href="#qa">Q&amp;A</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="notice">
+    <p>このページはラボの中だけで使うものです。リンクを外へ共有しないようお願いします。パスワードと合言葉は、このページには載せていません。Slackの <code class="ch">#00_全体アナウンス</code> を見てください。</p>
+  </div>
+
+  <!-- 1 はじめに（ラボについて・最初にやること・運営ルール） -->
+  <section id="intro">
+    <h2><span class="num">01</span>はじめに</h2>
+    <div class="h2line"></div>
+    <p class="subtoc">この中の項目：<a href="#about">自立共生ラボについて</a>／<a href="#start">最初にやること</a>／<a href="#rules">運営ルール</a></p>
+
+    <div class="subsec" id="about">
+    <h3 class="subh">自立共生ラボについて</h3>
+    <p>自立共生ラボは、AIを活用した生産性向上と付加価値創造、そしてそれに必要なAI人材開発と、AIと人の組織づくりに取り組むコミュニティです。AIを道具として依存するのではなく、道具と共に人も組織も成長していく。その気概のある、自律的かつ実証実験的な取り組みを行う場です。</p>
+
+    <h3>この場が大切にしていること</h3>
+    <ol class="rules">
+      <li>AIに依存しない「自立共生」を目指します。道具に判断を明け渡さず、自分の頭で決めます。</li>
+      <li>道具（AI）の進化に伴い、人間側も成長し続け、問いを立て続けることを大切にします。</li>
+      <li>経済的価値と社会的価値の双方を追求します。効率化だけを目的にしません。</li>
+      <li>事務局と受講者という上下の関係ではなく、全員でコミュニティを「自律運営」していきます。</li>
+      <li>結果だけでなく過程を共有します。うまくいかなかった試みにも価値があります。</li>
+    </ol>
+
+    <h3>どなたが参加できるか</h3>
+    <p>FOUNDATION や ARCHITECT など、自立共生に関わるプログラムの受講修了者が対象です。未受講の方であっても、AX（AIトランスフォーメーション）やコンヴィヴィアリティ（自立共生）に関心があり、自律分散的にAIとのトランスフォーメーションを試行していきたい方であれば、自由にご参加いただけます。</p>
+
+    <h3>会費と入会のタイミング</h3>
+    <p>会費は月額7,000円（税込）です。会費はコミュニティの中で再分配され、運営・講座・実証実験に関わった方へ、関わった度合いに応じて戻ります（くわしくは<a href="#share">会費の分配</a>へ）。</p>
+    <p>毎月20日までにお申し込み（ご入金）いただいた方は翌月から、21日以降のお申し込みは翌々月からのご参加となります。</p>
+    <a class="btn ghost" href="https://convivial-lab.co.jp/tmp/2026/rnhl3dvagecw/jiritsu-kyosei-lab-cycle.html" target="_blank" rel="noopener">ラボの紹介ページを開く</a>
+    </div>
+
+    <div class="subsec" id="start">
+    <h3 class="subh">最初にやること</h3>
+    <p class="lead">入会したら、まずこの5つをお願いします。</p>
+    <div class="card">
+      <ol class="steps">
+        <li><strong>運営ルールを読む</strong><br>活動していくうえで守っていただきたいルールです。このページの<a href="#rules">運営ルール</a>にあります。</li>
+        <li><strong>Slackの表示名を変える</strong><br>左下の自分のアイコン →「プロフィール」→ 名前の横の「編集」から、ニックネームなど呼ばれたい名前を入れて保存します。</li>
+        <li><strong>Slackで自己紹介をする</strong><br><code class="ch">#01_ようこそ自立共生ラボへ</code> に、ひとことで大丈夫なので書き込んでください。ほかのメンバーの自己紹介もぜひ読んでみてください。</li>
+        <li><strong>講座の予定を見る</strong><br>このページの<a href="#schedule">スケジュール</a>にあります。アーカイブも残りますが、ご都合が合えばぜひリアルタイムでご参加ください。</li>
+        <li><strong>過去の講座のアーカイブをのぞく</strong><br>録画・議事録・資料がアーカイブ置き場にそろっています。興味のあるものからどうぞ。</li>
+      </ol>
+      <a class="btn" href="https://w1790769328-hjh141892.slack.com/" target="_blank" rel="noopener">Slackを開く</a>
+      <a class="btn" href="https://watanabeshoten-llc.com/tmp/2026/jiritsu-lab/" target="_blank" rel="noopener">アーカイブ置き場を開く</a>
+    </div>
+    </div>
+
+    <div class="subsec" id="rules">
+    <h3 class="subh">運営ルール</h3>
+    <ol class="rules">
+      <li><strong>過程を共有します</strong><span>結果だけでなく、過程を共有します。うまくいかなかった試みにも価値があります。「まだ途中ですが」から始めて大丈夫です。</span></li>
+      <li><strong>気づいたことは、能動的に書き込む</strong><span>質問でも、共有でも、感想でも構いません。気づいたことをそのまま書き込んでください。</span></li>
+      <li><strong>実践は、成功も失敗も共有する</strong><span>自社・ご自身の実践を、うまくいったこともいかなかったことも、そのまま共有してください。</span></li>
+      <li><strong>他の方の共有に、反応する</strong><span>読んだだけで終わらせず、ひとこと返してください。それがこの場を育てます。</span></li>
+      <li><strong>登壇や実証実験に、手を挙げる</strong><span>講座への登壇に挙手してください。教えられる側から、教える側へ回ることを歓迎します。実証実験（PoC）へも、ぜひ手を挙げてください。</span></li>
+      <li><strong>サービスや商品の話は、運営会議へ</strong><span>自社のサービスや商品をこの場で扱いたいときは、月に一度の運営会議へお持ちください。実証実験（PoC）として扱うかどうかを、みんなで決めます。なお、マルチ商法や強引な売り込みは、自立共生のポリシーに反するため一切お控えください。</span></li>
+      <li><strong>他の方の実践・データを、無断で外へ出さない</strong><span>コミュニティ内で共有された他の方の実践やデータを、無断で外部へ転載・公表しないでください。</span></li>
+      <li><strong>コミュニティの情報を、許可なく持ち出さない</strong><span>アーカイブ動画、資料、この場で交わされた内容を、許可なく外部へ持ち出さないでください。</span></li>
+      <li><strong>誹謗中傷はしない</strong><span>特定の個人・企業への誹謗中傷、および他者の学びを妨げる言動はお控えください。</span></li>
+      <li><strong>記録と公表について</strong><span>一部のテーマについて、実証実験的に記録を取ることがあります。記録・分析は、原則として企業・団体名および個人名を伏せた形で行います。社会実装として公表する場合は、都度、個別に許諾をいただきます。許諾されないことによる不利益は一切ありません。分配額、PoCへの参加可否、コミュニティ内での取り扱いに影響しません。</span></li>
+    </ol>
+    </div>
+  </section>
+
+  <!-- 2 スケジュール -->
+  <section id="schedule">
+    <h2><span class="num">02</span>スケジュール</h2>
+    <div class="h2line"></div>
+
+    <h3>毎月のサイクル</h3>
+    <div class="cycle">
+      <div class="card"><div class="when">〜 20日</div><h4>起案・締め</h4><p>フォームから起案。翌月の会員数を確定します。</p></div>
+      <div class="card"><div class="when">22日ごろ</div><h4>運営ミーティング</h4><p>起案された内容を確認し、担当を決めます。</p></div>
+      <div class="card"><div class="when">25日</div><h4>翌月スケジュール公開</h4><p>コミュニティページで共有します。</p></div>
+    </div>
+    <p>起案はいつでも受け付けています。毎月20日までにいただいた分を、その月の運営ミーティングで検討します。20日を過ぎたものは、翌月のミーティングへ回ります。</p>
+    <p>講座は水曜日の20時からを基本にしています。担当する方の予定に合わせて、曜日や時間を変えることもできます。</p>
+
+    <div class="cal-head">
+      <h3 id="cal-title">カレンダー</h3>
+      <div class="cal-nav">
+        <button type="button" id="cal-prev" aria-label="前の月">‹ 前の月</button>
+        <button type="button" id="cal-next" aria-label="次の月">次の月 ›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="legend">
+      <span class="t-講座">講座</span>
+      <span class="t-ミーティング">ミーティング</span>
+      <span class="t-締め切り">締め切り・公開日</span>
+      <span class="t-イベント">イベント</span>
+    </div>
+
+    <div class="ev-list" id="ev-list"></div>
+
+    <div class="notice" style="margin-top:20px">
+      <p>Zoomの参加URLはSlackでお知らせします。予定の「参加URLを見る（Slack）」ボタンを押すと、URLが書かれたSlackの投稿が開きます。ボタンがない予定は、Slackの <code class="ch">#30_講座のお知らせ</code> を見てください。すべての講座は任意参加です。アーカイブ動画を共有しますので（リアルのオフ会を除く）、ご都合が合わないときは後からご覧ください。</p>
+    </div>
+  </section>
+
+  <!-- 3 リンク・Slack（リンク一覧・Slackの使い方） -->
+  <section id="links-slack">
+    <h2><span class="num">03</span>リンク・Slack</h2>
+    <div class="h2line"></div>
+    <p class="subtoc">この中の項目：<a href="#links">リンク一覧</a>／<a href="#slack">Slackの使い方</a></p>
+
+    <div class="subsec" id="links">
+    <h3 class="subh">リンク一覧</h3>
+    <div class="links">
+      <div class="card">
+        <h4>Slack</h4>
+        <p>お知らせ、相談、チームのやり取りはここで。使い方は<a href="#slack">Slackの使い方</a>へ。</p>
+        <a class="btn" href="https://w1790769328-hjh141892.slack.com/" target="_blank" rel="noopener">Slackを開く</a>
+      </div>
+      <div class="card">
+        <h4>アーカイブ置き場</h4>
+        <p>講座の録画・議事録・資料を見返せます。</p>
+        <ol class="steps">
+          <li>会員パスワードで入る（一度入れると、しばらくそのまま開けます）</li>
+          <li>上の「2026年10月」など、月のタブを選ぶ</li>
+          <li>講座ごとに「録画を見る」「議事録を読む」「資料を開く」</li>
+        </ol>
+        <a class="btn" href="https://watanabeshoten-llc.com/tmp/2026/jiritsu-lab/" target="_blank" rel="noopener">アーカイブ置き場を開く</a>
+      </div>
+      <div class="card">
+        <h4>Zoomの予約窓口</h4>
+        <p>講座や運営の会などで、Zoomが必要なときに申し込みます。</p>
+        <ol class="steps">
+          <li>会員パスワード → 運営用の合言葉の順で入る</li>
+          <li>日時と用途を書いて送る</li>
+          <li>出てくる「状況を見るURL」を控える。ティムさんが発行すると、そこにZoomのリンクが出ます</li>
+        </ol>
+        <a class="btn" href="https://watanabeshoten-llc.com/tmp/2026/jiritsu-lab/zoom.php" target="_blank" rel="noopener">Zoomを予約する</a>
+      </div>
+      <div class="card">
+        <h4>記録の登録窓口</h4>
+        <p>講座や会のあとに、録画・議事録・資料をアーカイブ置き場に登録します。</p>
+        <ol class="steps">
+          <li>会員パスワード → 登録用の合言葉の順で入る</li>
+          <li>画面の案内に沿って、講座名・日付・録画・議事録・資料を入れる</li>
+          <li>アーカイブ置き場に並んだら、Slackで「載りました」と知らせる</li>
+        </ol>
+        <a class="btn" href="https://watanabeshoten-llc.com/tmp/2026/jiritsu-lab/toroku.php" target="_blank" rel="noopener">記録を登録する</a>
+      </div>
+      <div class="card">
+        <h4>ラボの紹介ページ</h4>
+        <p>ラボの目的や、会費と再分配のしくみをくわしく載せています。</p>
+        <a class="btn ghost" href="https://convivial-lab.co.jp/tmp/2026/rnhl3dvagecw/jiritsu-kyosei-lab-cycle.html" target="_blank" rel="noopener">紹介ページを開く</a>
+      </div>
+    </div>
+    </div>
+
+    <div class="subsec" id="slack">
+    <h3 class="subh">Slackの使い方</h3>
+
+    <h3>画面の見方</h3>
+    <div class="screen">
+      <div class="card">
+        <div class="where">左の列</div>
+        <p>部屋（チャンネル）の一覧です。太字の部屋には新しい書き込みがあります。赤い数字は、自分あての書き込みの数です。</p>
+      </div>
+      <div class="card">
+        <div class="where">真ん中</div>
+        <p>みんなの書き込みが並びます。いちばん下の欄に書いて送ります。</p>
+      </div>
+      <div class="card">
+        <div class="where">上のタブ</div>
+        <p>部屋ごとのまとめページ（キャンバス）です。「まずはここから」「講座一覧」などがあります。</p>
+      </div>
+    </div>
+
+    <h3>部屋の地図</h3>
+    <p class="lead">部屋の番号の十の位で、部屋の種類が分かります。</p>
+    <div class="rooms">
+      <div class="room r00">
+        <div class="rh"><span class="rn">00番台｜全体</span><span class="rd">みんなに関わること</span></div>
+        <div class="rl">#00_全体アナウンス／#01_ようこそ自立共生ラボへ／#02_ミーティングのお知らせ／#03_ミーティング報告-議事録</div>
+      </div>
+      <div class="room r10">
+        <div class="rh"><span class="rn">10・20番台｜チーム</span><span class="rd">各チームのやり取り</span></div>
+        <div class="rl">#10_運営チーム／#20_集客広報チーム（チームが増えたら11、21…と増えます）</div>
+      </div>
+      <div class="room r30">
+        <div class="rh"><span class="rn">30番台｜講座</span><span class="rd">講座の準備から報告まで</span></div>
+        <div class="rl">#30_講座のお知らせ／#31_講座の企画-準備／#32_講座の報告-アーカイブ</div>
+      </div>
+      <div class="room r40">
+        <div class="rh"><span class="rn">40番台｜企画・お試し</span><span class="rd">思いつきを試してみる</span></div>
+        <div class="rl">#40_アイディア／#41_poc_新しい取り組み</div>
+      </div>
+      <div class="room r50">
+        <div class="rh"><span class="rn">50番台｜お金</span><span class="rd">会費や分配の報告</span></div>
+        <div class="rl">#50_会計関連報告</div>
+      </div>
+      <div class="room r60">
+        <div class="rh"><span class="rn">60番台｜役割</span><span class="rd">役割の募集と立候補</span></div>
+        <div class="rl">#60_役割の募集_立候補相談窓口</div>
+      </div>
+      <div class="room r90">
+        <div class="rh"><span class="rn">90番台｜自由</span><span class="rd">迷ったらここへ</span></div>
+        <div class="rl">#90_質問-雑談など自由な発言スペース</div>
+      </div>
+    </div>
+    <p>部屋に入るときは、左の「チャンネルを追加する」→ 一覧から部屋を選んで「参加」を押します。新しいチャンネルを作りたいときは、運営チームに相談してください。</p>
+
+    <h3>はじめの3ステップ</h3>
+    <div class="three">
+      <div class="card"><div class="n">1</div><div><h4>#01_ようこそ自立共生ラボへ を読む</h4><p>上の「まずはここから」タブも読んでください。</p></div></div>
+      <div class="card"><div class="n">2</div><div><h4>#01_ようこそ自立共生ラボへ で自己紹介</h4><p>読んだら、同じ部屋でひとことで大丈夫です。</p></div></div>
+      <div class="card"><div class="n">3</div><div><h4>気になる部屋をのぞく</h4><p>読むだけでも大丈夫です。質問は #90_質問-雑談など自由な発言スペース へ。</p></div></div>
+    </div>
+
+    <h3>「投稿」と「スレッドへの返信」の使い分け</h3>
+    <div class="two">
+      <div class="card">
+        <h4>投稿</h4>
+        <p>新しい話題を始めるときに使います。</p>
+        <p class="sub">やり方：部屋を開いて、いちばん下の入力欄に書いて送るだけです。<br>例：講座のお知らせ、新しい相談、自己紹介</p>
+      </div>
+      <div class="card">
+        <h4>スレッドへの返信</h4>
+        <p>ある書き込みに返事をするときに使います。</p>
+        <ol class="steps sub">
+          <li>返事したい書き込みにマウスを乗せる</li>
+          <li>吹き出しマーク（スレッドで返信する）をクリック</li>
+          <li>右側に出た欄に書いて送る</li>
+        </ol>
+      </div>
+    </div>
+    <p>返事をスレッドにまとめると、部屋が話題ごとに整理されて読みやすくなります。</p>
+    <a class="btn" href="https://w1790769328-hjh141892.slack.com/" target="_blank" rel="noopener">Slackを開く</a>
+    </div>
+  </section>
+
+  <!-- 4 講座を担当する人へ -->
+  <section id="lecturer">
+    <h2><span class="num">04</span>講座を担当する人へ</h2>
+    <div class="h2line"></div>
+    <p class="lead">講座を担当することが決まったら、以下を参考にご自身で準備をお願いします。分からないことは運営チームまでお気軽にどうぞ。</p>
+
+    <div class="card">
+      <h4>講座の前</h4>
+      <ol class="steps">
+        <li><strong>開催日時を決める</strong><br>基本は運営ミーティングで決めます。決まらなければ運営チームと調整します。</li>
+        <li><strong>ZoomのURLを用意する</strong><br>ご自身で用意できる場合はそちらで。難しい場合は<a href="#links">Zoomの予約窓口</a>からティムさんに依頼してください。</li>
+        <li><strong>Facebookのイベントページを作る</strong><br>自立共生ラボのFacebookグループ内で作り、メンバー全員を招待すると皆さんに通知されます。Slackに完全に移ったあとは不要になります。</li>
+        <li><strong>Slackでお知らせする</strong><br><code class="ch">#30_講座のお知らせ</code> でアナウンスしてください。</li>
+        <li><strong>メンバー以外の方が参加するとき</strong><br>コミュニティメンバー以外の方が参加し、資料の共有が必要なときは、Googleドライブのフォルダ作成をちえみさんに依頼してください。</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>講座のあと</h4>
+      <ol class="steps">
+        <li><strong>アーカイブを登録する</strong><br><a href="#links">記録の登録窓口</a>から、録画や議事録などを登録してください。</li>
+        <li><strong>Slackで「載りました」と知らせる</strong><br>アーカイブ置き場に並んだら、<code class="ch">#32_講座の報告-アーカイブ</code> でひとこと知らせてください。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 5 起案と立候補 -->
+  <section id="propose">
+    <h2><span class="num">05</span>起案と役割の立候補</h2>
+    <div class="h2line"></div>
+    <p class="lead">やりたいことがあれば、下のフォームから出してください。フォームに入力するとSlackに連携され、皆さんにも共有されます。すべて挙手制です。希望が重なったときは、運営ミーティングで相談のうえ決めます。</p>
+
+    <div class="card">
+      <h4>講座登壇の起案</h4>
+      <p>講座に登壇したい方はこちらへ。テーマと、どんな方におすすめかを教えてください。</p>
+      <p class="sub">書く内容：講座のテーマ／講師自己紹介／おすすめの対象／使用するAIツール。講座は必ず録画し、アーカイブとして共有します。</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSeFwaFn88CecpiTY9OOPWuBoTH0p2bHdQf_baVZjY_PvjQGsg/viewform" target="_blank" rel="noopener">講座登壇起案フォーム</a>
+    </div>
+    <div class="card">
+      <h4>PoC（実証実験）の起案</h4>
+      <p>複数のメンバーで取り組む実証実験を起案できます。原則、会員20名以上になってからの開始です。</p>
+      <p class="sub">書く内容：PoCのテーマ／参画希望人数／必要なツール・レベル／参画メリット／想定期間／効果の測定方法</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSc5gvcdNT7szWLHMQA3TV1lJfDHkR6z8aMB2ACCz2uz8WXqpw/viewform" target="_blank" rel="noopener">PoC（実証実験）の起案フォーム</a>
+    </div>
+    <div class="card">
+      <h4>新しい役割の起案</h4>
+      <p>「こんな役割があったほうがいい」と思ったら、こちらで提案してください。</p>
+      <p class="sub">書く内容：役割の名称／具体的な役割内容／必要だと思った背景／想定される稼働量</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdQ-jfq9l-kENZ0H6LJwoPxTnMFqDV5cfeBzzE2eRbMyzDpiw/viewform" target="_blank" rel="noopener">新しい役割の起案フォーム</a>
+    </div>
+    <div class="card">
+      <h4>役割への立候補</h4>
+      <p>決まっている役割に手を挙げていただけます。「何月に担当します」という形でご提案ください。「まず一緒にやりながら覚えたい」でも大丈夫です。</p>
+      <p class="sub">書く内容：立候補する役割／担当したい月／期間／意気込み</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLScNx-yjAg_kzASjubn7CobNAlI5QVEaYU5RzSNiBIQFGlQQdA/viewform" target="_blank" rel="noopener">役割への立候補フォーム</a>
+    </div>
+    <p>いきなり役割を決めることはしません。何度か参加してみて、「やってみようかな」と思えたタイミングで手を挙げてください。</p>
+    <p>皆さんから挙がった起案は、すべてスプレッドシートにストックされます。</p>
+    <a class="btn ghost" href="https://docs.google.com/spreadsheets/d/1pWceQQxsFxSWl9wd69YpJh6IaKVkhqVPTFBIINNLRz0/edit?gid=842573585#gid=842573585" target="_blank" rel="noopener">起案内容を見る</a>
+  </section>
+
+  <!-- 6 担当者一覧 -->
+  <section id="members">
+    <h2><span class="num">06</span>担当者一覧（2026年11月）</h2>
+    <div class="h2line"></div>
+    <p class="lead">「これは誰に聞けばいい？」と迷ったときに見てください。毎月の運営ミーティングのあとに更新します。</p>
+    <a class="btn" href="https://w1790769328-hjh141892.slack.com/archives/C0C56DUCQPR/p1793058251811669" target="_blank" rel="noopener">11月の役割と分配を見る（Slack）</a>
+    <div class="tbl-wrap" style="margin-top:16px">
+    <table class="tbl">
+      <tr><th>役割</th><th>担当</th><th>おもにやること</th></tr>
+      <tr><td>会計</td><td class="who">ちえみ</td><td>会費の管理、分配の計算</td></tr>
+      <tr><td>Zoom・アーカイブ置き場</td><td class="who">Timさん</td><td>Zoomの発行、録画・議事録・資料の置き場の管理</td></tr>
+      <tr><td>運営チーム</td><td class="who">ひろ・さーな・ますえ</td><td>運営ミーティングの準備、Slackの整備、各種のご案内</td></tr>
+      <tr><td>広報集客チーム</td><td class="who">ひろ・さーな・あさみん・ちまき・ゆーほりん・ちえみ</td><td>メンバーとの1on1、クレド・ペルソナのまとめ等</td></tr>
+    </table>
+    </div>
+    <p class="sub">役割に手を挙げたいときは、<a href="#propose">役割への立候補フォーム</a>からどうぞ。相談は <code class="ch">#60_役割の募集_立候補相談窓口</code> へ。</p>
+  </section>
+
+  <!-- 7 会費の分配 -->
+  <section id="share">
+    <h2><span class="num">07</span>会費の分配</h2>
+    <div class="h2line"></div>
+    <p>いただいた会費を、運営・講座・実証実験に関わった方へ戻していく仕組みです。</p>
+    <ul class="plain">
+      <li>会費は、運営・講座・実証実験に関わった人へ、関わった度合い（口数）に応じて戻ります。</li>
+      <li>講座は、1コマの登壇が2口、進行・司会が1口です。</li>
+      <li>運営・講座の配分は四半期ごと（年4回）にまとめて支払われます。毎月の口数は、コミュニティページで公開します。</li>
+    </ul>
+    <p>配分の割合や支払いの時期など、くわしい内容は紹介ページにまとめています。</p>
+    <a class="btn ghost" href="https://convivial-lab.co.jp/tmp/2026/rnhl3dvagecw/jiritsu-kyosei-lab-cycle.html" target="_blank" rel="noopener">くわしい仕組みを見る</a>
+  </section>
+
+  <!-- 8 Q&A -->
+  <section id="qa">
+    <h2><span class="num">08</span>Q&amp;A</h2>
+    <div class="h2line"></div>
+    <div class="card">
+      <h4>Q. 新しいメンバーを紹介したいときは？</h4>
+      <p>紹介のルールは、いま準備中です。紹介したい方がいるときは、運営チームに相談してください。</p>
+    </div>
+    <div class="card">
+      <h4>Q. 講座に参加できなかったときは？</h4>
+      <p>すべての講座は任意参加です。録画・議事録・資料がアーカイブ置き場に載るので、後からご覧ください（リアルのオフ会を除く）。</p>
+    </div>
+    <div class="card">
+      <h4>Q. アーカイブ置き場のパスワードが分からないときは？</h4>
+      <p>このページにはパスワードと合言葉を載せていません。Slackの <code class="ch">#00_全体アナウンス</code> を見てください。</p>
+    </div>
+    <div class="card">
+      <h4>Q. 申し込みはいつまでにすれば、翌月から参加できますか？</h4>
+      <p>毎月20日までにお申し込み（ご入金）いただいた方は翌月から、21日以降のお申し込みは翌々月からのご参加となります。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>自立共生ラボ ポータル ／ 運営：自立共生ラボ 運営チーム</footer>
+
+<script src="schedule.js"></script>
+<script>
+(function () {
+  // ページ内リンク（もくじなど）を押したら、その項目へ移動する
+  // 上に固定したもくじの高さぶん、少し上で止める
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest('a[href^="#"]');
+    if (!a) return;
+    var target = document.getElementById(a.getAttribute("href").slice(1));
+    if (!target) return;
+    ev.preventDefault();
+    var navH = document.querySelector("nav.toc").offsetHeight;
+    var y = target.getBoundingClientRect().top + window.pageYOffset - navH - 12;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  });
+})();
+
+(function () {
+  var ARCHIVE_URL = "https://watanabeshoten-llc.com/tmp/2026/jiritsu-lab/";
+  var events = (window.SCHEDULE || []).slice().sort(function (a, b) {
+    return (a.date + a.start).localeCompare(b.date + b.start);
+  });
+  var WD = ["日", "月", "火", "水", "木", "金", "土"];
+  var now = new Date();
+  var todayStr = ymd(now);
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parse(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function monthKey(y, m) { return y + "-" + pad(m + 1); }
+  function esc(s) {
+    return String(s || "").replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // 予定がある月の範囲（前後の月ボタンの上限・下限に使う）
+  var months = events.map(function (e) { return e.date.slice(0, 7); });
+  var minKey = months.length ? months[0] : monthKey(now.getFullYear(), now.getMonth());
+  var maxKey = months.length ? months[months.length - 1] : minKey;
+
+  // 最初に出す月：今月。今月が範囲外なら、いちばん近い端の月
+  var curKey = monthKey(now.getFullYear(), now.getMonth());
+  if (curKey < minKey) curKey = minKey;
+  if (curKey > maxKey) curKey = maxKey;
+  var view = { y: +curKey.slice(0, 4), m: +curKey.slice(5, 7) - 1 };
+
+  var grid = document.getElementById("cal-grid");
+  var list = document.getElementById("ev-list");
+  var title = document.getElementById("cal-title");
+  var prev = document.getElementById("cal-prev");
+  var next = document.getElementById("cal-next");
+
+  function render() {
+    var key = monthKey(view.y, view.m);
+    title.textContent = view.y + "年" + (view.m + 1) + "月";
+    prev.disabled = key <= minKey;
+    next.disabled = key >= maxKey;
+
+    var inMonth = events.filter(function (e) { return e.date.slice(0, 7) === key; });
+
+    // カレンダーの升目
+    var html = WD.map(function (w, i) {
+      return '<div class="dow' + (i === 0 ? " sun" : i === 6 ? " sat" : "") + '">' + w + "</div>";
+    }).join("");
+    var first = new Date(view.y, view.m, 1).getDay();
+    var days = new Date(view.y, view.m + 1, 0).getDate();
+    for (var i = 0; i < first; i++) html += '<div class="day empty"></div>';
+    for (var d = 1; d <= days; d++) {
+      var ds = key + "-" + pad(d);
+      var evs = inMonth.filter(function (e) { return e.date === ds; });
+      html += '<div class="day' + (ds === todayStr ? " today" : "") + '"><span class="d">' + d + "</span>";
+      evs.forEach(function (e) {
+        var idx = events.indexOf(e);
+        html += '<button type="button" class="cal-ev t-' + esc(e.type) + '" data-ev="' + idx + '" title="' + esc(e.title) + '">' +
+          (e.start ? esc(e.start) + " " : "") + esc(e.title) + "</button>";
+      });
+      html += "</div>";
+    }
+    var tail = (7 - ((first + days) % 7)) % 7;
+    for (var t = 0; t < tail; t++) html += '<div class="day empty"></div>';
+    grid.innerHTML = html;
+
+    // 下の一覧
+    if (!inMonth.length) {
+      list.innerHTML = '<p class="ev-empty">この月の予定はまだありません。</p>';
+      return;
+    }
+    list.innerHTML = inMonth.map(function (e) {
+      var idx = events.indexOf(e);
+      var dt = parse(e.date);
+      var isPast = e.date < todayStr;
+      var time = e.start ? e.start + (e.end ? " - " + e.end : "") : "";
+      var meta = [e.type, time, e.speaker ? "講師・担当：" + e.speaker : ""].filter(Boolean).map(esc).join("　／　");
+      var btns = "";
+      // ZoomのURLはSlackの投稿にだけ書き、ここからはその投稿へ飛ぶ
+      if (e.slack && !isPast) btns += '<a class="btn" href="' + esc(e.slack) + '" target="_blank" rel="noopener">参加URLを見る（Slack）</a>';
+      if (e.facebook) btns += '<a class="btn ghost" href="' + esc(e.facebook) + '" target="_blank" rel="noopener">Facebookイベント</a>';
+      if (e.materials) btns += '<a class="btn ghost" href="' + esc(e.materials) + '" target="_blank" rel="noopener">資料を開く</a>';
+      if (isPast && (e.type === "講座" || e.type === "ミーティング")) {
+        btns += '<a class="btn ghost" href="' + ARCHIVE_URL + '" target="_blank" rel="noopener">アーカイブ置き場で見返す</a>';
+      }
+      return '<div class="card ev-card t-' + esc(e.type) + (isPast ? " past" : "") + '" id="ev-' + idx + '">' +
+        '<div class="ev-date"><div class="md">' + (dt.getMonth() + 1) + "/" + dt.getDate() + '</div><div class="wd">' + WD[dt.getDay()] + "</div></div>" +
+        '<div class="ev-body"><h4>' + esc(e.title) + "</h4>" +
+        '<div class="ev-meta">' + meta + "</div>" +
+        (e.description ? '<p class="desc">' + esc(e.description) + "</p>" : "") +
+        (btns ? "<div>" + btns + "</div>" : "") +
+        "</div></div>";
+    }).join("");
+  }
+
+  grid.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".cal-ev");
+    if (!b) return;
+    var card = document.getElementById("ev-" + b.getAttribute("data-ev"));
+    if (!card) return;
+    var navH = document.querySelector("nav.toc").offsetHeight;
+    var y = card.getBoundingClientRect().top + window.pageYOffset - navH - 16;
+    window.scrollTo({ top: y, behavior: "smooth" });
+    card.classList.add("flash");
+    setTimeout(function () { card.classList.remove("flash"); }, 1600);
+  });
+  prev.addEventListener("click", function () {
+    view.m--; if (view.m < 0) { view.m = 11; view.y--; } render();
+  });
+  next.addEventListener("click", function () {
+    view.m++; if (view.m > 11) { view.m = 0; view.y++; } render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
